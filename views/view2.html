@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <link rel="stylesheet" type="text/css" href="mediacenter/css/style.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta charset="utf-8">
+    <title></title>
+	<style>
+    </style>
+	    <script type="text/javascript">
+		function displayWithValue() {
+		var namevalue = document.getElementById('search').value;
+		console.log('field valueid: ', namevalue)
+		let cookieValue = "ByName?name=" + namevalue;
+		setCookie('lastUrl',cookieValue,7);
+		if(namevalue.length!=0){
+			// POST request using fetch() 
+		fetch("http://localhost:1337/ByName?name=" + namevalue, { 
+
+		// Adding method type 
+		method: "POST", 
+
+		}) 
+
+		// Converting to JSON 
+		.then(response => response.json())
+
+		// Displaying results to console 
+		.then( (result) => {
+		var listOfFilms = `${result.title}<br/>`;
+		for (i=0;i<result.message.length;i++)
+		{
+			//We don't display the images, only the movies
+			if (result.message[i].substr(result.message[i].lastIndexOf('.') + 1) != 'jpg' ){
+			    let actualfilm = result.message[i].substring(result.message[i].lastIndexOf("\\") + 1,result.message[i].lastIndexOf("."));
+				let pathFilm = result.message[i].substring(result.message[i].indexOf("G:\Films")+9,result.message[i].indexOf(actualfilm));
+				console.log('full path ', pathFilm)
+				let actualfilmLink = result.message[i];
+				let actualfilmAllocine = formatFileNameForAllocine(actualfilm);							
+				//listOfFilms = listOfFilms + "<img src='" + pathFilm + "images/" + actualfilm + ".jpg' width='300' height='400' title="+ result.message[i] +">&nbsp";				
+				listOfFilms = listOfFilms + "<a href='http://www.allocine.fr/recherche/?q=" + actualfilmAllocine + "'><img src='" + pathFilm + "images/" + actualfilm + ".jpg' width='300' height='400' title="+ result.message[i] +"></a>&nbsp";				
+			}
+		}
+			console.log('success:', result)
+			let div=document.getElementById('test');
+			div.innerHTML=listOfFilms;
+		})
+		.catch(error => console.log('error:', error));
+		} else{
+		let div=document.getElementById('test');
+		div.innerHTML="<div class='top'><p><B><font size='5'>vous devez saisir une valeur</font></B></p></div>"}
+		}
+		
+		function displayByType() {	
+	    var e = document.getElementById("search2");
+		var namevalueByType = e.options[e.selectedIndex].text;
+		let cookieValue = "ByType?type=" + namevalueByType;
+		setCookie('lastUrl',cookieValue,7);
+		console.log('field valueid: ', namevalueByType)
+			// POST request using fetch() 
+		fetch("http://localhost:1337/ByType?type=" + namevalueByType, { 
+
+		// Adding method type 
+		method: "POST", 
+
+		}) 
+
+		// Converting to JSON 
+		.then(response => response.json())
+
+		// Displaying results to console 
+		.then( (result) => {
+		var listOfFilms = `${result.title}<br/>`;
+		for (i=0;i<result.message.length;i++)
+		{
+			//We don't display the images, only the movies
+			if (result.message[i].substr(result.message[i].lastIndexOf('.') + 1) != 'jpg' ){
+				let pathFilm = result.message[i].substring(result.message[i].lastIndexOf(namevalueByType)-1,result.message[i].lastIndexOf("\\")) + "\\";
+				console.log('full path ', pathFilm)
+			    let actualfilm = result.message[i].substring(result.message[i].lastIndexOf("\\") + 1,result.message[i].lastIndexOf("."));
+			    let actualfilmAllocine = formatFileNameForAllocine(actualfilm);
+				let actualfilmLink = result.message[i];					
+                listOfFilms = listOfFilms + "<a href='http://www.allocine.fr/recherche/?q=" + actualfilmAllocine + "'><img src='" + pathFilm + "images/" + actualfilm + ".jpg' width='300' height='400' title="+ result.message[i] +"></a>&nbsp";				
+				//listOfFilms = listOfFilms + "<img src='" + pathFilm + "images/" + actualfilm + ".jpg' width='300' height='400' title="+ result.message[i] +">&nbsp";				
+				
+			}
+		}
+			console.log('success:', result)
+			let div=document.getElementById('test');
+			div.innerHTML=listOfFilms;
+			
+		})
+		.catch(error => console.log('error:', error));
+		}
+		function setCookie(name,value,days) {
+			var expires = "";
+			if (days) {
+			var date = new Date();
+			date.setTime(date.getTime() + (days*24*60*60*1000));
+			expires = "; expires=" + date.toUTCString();
+			}
+			document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+		}
+		function getCookie(name) {
+			var nameEQ = name + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0;i < ca.length;i++) {
+			var c = ca[i];
+			while (c.charAt(0)==' ') c = c.substring(1,c.length);
+			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+			}
+			return null;
+		}
+		function eraseCookie(name) {   
+			document.cookie = name+'=; Max-Age=-99999999;';  
+		}
+		function loadPage() {
+		var x = getCookie('lastUrl');
+		if (x.indexOf("ByType") != -1) {
+			displayByType();
+		}
+		if (x.indexOf("ByName") != -1) {
+			displayWithValue();
+		}
+			return null;
+		}
+		function formatFileNameForAllocine(fileName) {
+			var newFileName = fileName.replace("_","+");
+			newFileName = newFileName.replace("_","+");
+			newFileName = newFileName.replace("_","+");
+			newFileName = newFileName.replace(".","+");
+			newFileName = newFileName.replace(".","+");
+			newFileName = newFileName.replace(".","+");
+			newFileName = newFileName.replace(".","+");
+			if ((newFileName.lastIndexOf("20") != -1)) {
+				newFileName = newFileName.substring(0,newFileName.lastIndexOf("20") - 1);			
+			}
+			if ((newFileName.lastIndexOf("19") != -1)) {
+				newFileName = newFileName.substring(0,newFileName.lastIndexOf("19") - 1);			
+			}
+			return newFileName;
+		}
+    </script>
+  </head>
+  <body onload="loadPage()">
+      <!--div id="test" style="height:300px; width:5000px;"!-->
+	  <div id="test" class="parent-div">	  
+      </div>      
+      <form class="text-center">
+	  <div class="container">
+	  	 <img src="mediacenter/rectangle.png" width="430" height="488" class="opacity">
+		 <div class="top"><p><B><font size="5">chercher votre film selon votre critère: </font></B></p></div>	
+		 <div class="top2"><p><B><font size="5">Recherche par nom</font></B></p></div>	
+		 <div class="box">
+		  <div class="container-4">
+			<input type="search" id="search" name="name" required placeholder="Search..."/>			
+			<button type="button" id="search22" class="icon" onclick="displayWithValue()"><i class="fa fa-search"></i></button>
+		  </div>
+	    </div>
+		 <div class="top3"><p><B><font size="5">Recherche par type</font></B></p></div>
+		 <!--div>
+         <!--input type="text" id="name" name="name" maxlength="10" size="20">
+		 <input id="submit" type="button" onclick="displayWithValue()" value="recherche par type" /></div>
+		 <!--button onclick="displayWithValue()">Cliquez Ici</button!-->
+		 <!--div>
+		<!--select id="type">
+		<option value="1" selected="selected">Science-Fiction</option>
+		<option value="2">Dessin-Animes</option>
+		<option value="3">Comedie</option>
+		</select>
+		<!--button id="search22" class="icon" onclick="displayByType()"/><i class="fa fa-search"></i!-->
+		<!--i class="fa fa-minus-circle" id="search22" onclick="displayByType()"></i>
+		</div>
+		<!--button id="search22" class="icon" onclick="displayByType()"><i class="fa fa-search"></i></button!-->
+		<!--/div>
+		 <!--div class="middle2">
+		<!--select id="type">
+		<option value="1" selected="selected">Science-Fiction</option>
+		<option value="2">Dessin-Animes</option>
+		<option value="3">Comedie</option>
+		</select!-->
+         <!--input id="submit" type="button" onclick="displayByType()" value="recherche par type" /!--><!--/div!-->
+	  <!--/div!-->
+		<!--div class="box">
+		  <div class="container-4">
+			<input type="search" id="search" name="name" placeholder="Search..." />
+			<button id="search22" class="icon"><i class="fa fa-search" onclick="displayWithValue()"></i></button>
+		  </div>
+	    </div!-->
+		<div class="box2">
+		  <div class="container-4">
+			<!--input type="search" id="search" name="name" placeholder="Search..." /!-->
+			<select id="search2">
+				<option value="1" selected="selected">Science-Fiction</option>
+				<option value="2">Dessin-Animes</option>
+				<option value="3">Comedie</option>
+			</select>			
+			<button type="button" id="search22" class="icon" onclick="displayByType()"><i class="fa fa-search"></i></button>
+			<!--button id="search22" class="icon" onclick="displayByType()"><i class="fa fa-search"></i></button!-->
+			<!--button class="icon" onclick="displayByType()"><i class="fa fa-search"></i></button!-->
+			<!--input id="submit" type="button" onclick="displayByType()" value="recherche par type" /!-->
+		  </div>
+	    </div>
+	  </div>
+      </form>
+  </body>
+</html>
