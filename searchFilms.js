@@ -22,17 +22,20 @@ var path = require('path'),
 
     var files=fs.readdirSync(startPath);
     for(var i=0;i<files.length;i++){
-        var filename=path.join(startPath,files[i]);
-        var stat = fs.lstatSync(filename);
-		var filenameUpper = filename.toUpperCase();
-		var filterUpper = filter.toUpperCase();
-        if (stat.isDirectory()){
-            results = results.concat(findFilesInDir(filename,filter)); //recurse
-        }
-		else if (filenameUpper.indexOf(filterUpper)>=0) {
-            console.log('-- found: ',filename);
-            results.push(filename);
-        }
+        console.log('-- file name: ',startPath);
+		if (startPath.indexOf("mediacenter") == -1) {
+			var filename=path.join(startPath,files[i]);
+			var stat = fs.lstatSync(filename);
+			var filenameUpper = filename.toUpperCase();
+			var filterUpper = filter.toUpperCase();
+			if (stat.isDirectory()){
+				results = results.concat(findFilesInDir(filename,filter)); //recurse
+			}
+			else if (filenameUpper.indexOf(filterUpper)>=0) {
+				console.log('-- found: ',filename);
+				results.push(filename);
+			}
+		}
     }
     return results;
 },
